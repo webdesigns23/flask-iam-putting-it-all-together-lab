@@ -184,8 +184,8 @@ Implement serialization schemas for both models.
 #### Step 3: Migrate and Update the Database
 
 Run the migrations after creating your models. You'll need to run
-`flask db init` before running `flask db revision autogenerate` or
-`flask db upgrade`.
+`flask db init` before running `flask db migrate -m "initial migration"` and
+`flask db upgrade head`.
 
 #### Step 4: Verify your Code and Seed the Database
 
