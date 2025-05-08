@@ -1,56 +1,38 @@
-# Putting it All Together: IAM Lab
-
-## Learning Goals
-
-- Authenticate a user with a username and password.
-- Authorize logged in users for specific actions.
-
----
-
-## Key Vocab
-
-- **Identity and Access Management (IAM)**: a subfield of software engineering
-  that focuses on users, their attributes, their login information, and the
-  resources that they are allowed to access.
-- **Authentication**: proving one's identity to an application in order to
-  access protected information; logging in.
-- **Authorization**: allowing or disallowing access to resources based on a
-  user's attributes.
-- **Session**: the time between a user logging in and logging out of a web
-  application.
-- **Cookie**: data from a web application that is stored by the browser. The
-  application can retrieve this data during subsequent sessions.
-
----
+# Lab: Putting it All Together - IAM Flask API
 
 ## Introduction
 
-This is the biggest lab yet for this phase, so make sure to set aside some time
+This lab is on the longer side, so make sure to set aside some time
 for this one. It's set up with a few different checkpoints so that you can build
 out the features incrementally. By the end of this lab, you'll have built out
 full authentication and authorization flow using sessions and cookies in Flask,
 so getting this lab under your belt will give you some good code to reference
 when you're building your next project with _auth_. Let's get started!
 
----
+## Tools & Resources
 
-## Setup
+- [GitHub Repo](https://github.com/learn-co-curriculum/flask-iam-putting-it-all-together-lab)
+- [API - Flask: `class flask.session`](https://flask.palletsprojects.com/en/2.2.x/api/#flask.session)
+- [User's Guide - Flask RESTful](https://flask-restful.readthedocs.io/en/latest/)
+- [Flask-Bcrypt](https://flask-bcrypt.readthedocs.io/en/1.0.1/)
+
+## Set Up
 
 As with other labs in this section, there is some starter code in place for a
 Flask API backend and a React frontend. To get set up, run:
 
-```console
-$ pipenv install && pipenv shell
-$ npm install --prefix client
-$ cd server
+```bash
+pipenv install && pipenv shell
+npm install --prefix client
+cd server
 ```
 
 You can work on this lab by running the tests with `pytest`. It will also be
 helpful to see what's happening during the request/response cycle by running the
 app in the browser. You can run the Flask server with:
 
-```console
-$ python app.py
+```bash
+python app.py
 ```
 
 Note that running `python app.py` will generate an error if you haven't created
@@ -58,13 +40,20 @@ your models and run your migrations yet.
 
 And you can run React in another terminal from the project root directory with:
 
-```console
-$ npm start --prefix client
+```bash
+npm start --prefix client
 ```
 
-### Models
+## Instructions
 
-Create a `User` model with the following attributes:
+### Task 1: Define the Problem
+
+
+### Task 2: Determine the Design
+
+#### Models
+
+The `User` model will have the following attributes:
 
 - `id` that is an integer type and a primary key.
 - `username` that is a `String` type.
@@ -72,7 +61,7 @@ Create a `User` model with the following attributes:
 - `image_url` that is a `String` type.
 - `bio` that is a `String` type.
 
-Your `User` model should also:
+The `User` model should also:
 
 - incorporate `bcrypt` to create a secure password. Attempts to access the
   `password_hash` should be met with an `AttributeError`.
@@ -80,7 +69,7 @@ Your `User` model should also:
   can have the same username).
 - **have many** recipes.
 
-Next, create a `Recipe` model with the following attributes:
+The `Recipe` model will have the following attributes:
 
 - a recipe **belongs to** a user.
 - `id` that is an integer type and a primary key.
@@ -88,37 +77,15 @@ Next, create a `Recipe` model with the following attributes:
 - `instructions` that is a `String` type.
 - `minutes_to_complete` that is an `Integer` type.
 
-Add database constraints for the `Recipe` model:
-
 Your `Recipe` model should also:
 
 - constrain the `title` to be present.
 - constrain the `instructions` to be present and at least 50 characters long, 
 alternately you may use a custom validation.
 
-Run the migrations after creating your models. You'll need to run
-`flask db init` before running `flask db revision autogenerate` or
-`flask db upgrade`.
+#### Routes
 
-Ensure that the tests for the models are passing before moving forward. To run
-the tests for _only_ the model files, run:
-
-```console
-$ pytest testing/models_testing/
-```
-
-Once your tests are passing, you can seed your database from within the `server`
-directory by running:
-
-```console
-$ python seed.py
-```
-
-### Sign Up Feature
-
-After creating the models, the next step is building out a sign up feature.
-
-Handle sign up by implementing a `POST /signup` route. It should:
+The `POST /signup` route should:
 
 - Be handled in a `Signup` resource with a `post()` method.
 - In the `post()` method, if the user is valid:
@@ -131,17 +98,6 @@ Handle sign up by implementing a `POST /signup` route. It should:
   - Return a JSON response with the error message, and an HTTP status code of
     422 (Unprocessable Entity).
 
-> **Note: Recall that we need to format our error messages in a way that makes
-> it easy to display the information in our frontend. For this lab, because we
-> are setting up multiple validations on our `User` and `Recipe` models, our
-> error responses need to be formatted in a way that accommodates multiple
-> errors.**
-
-### Auto-Login Feature
-
-Users can log into our app! 🎉 But we want them to **stay** logged in when they
-refresh the page, or navigate back to our site from somewhere else.
-
 Handle auto-login by implementing a `GET /check_session` route. It should:
 
 - Be handled in a `CheckSession` resource with a `get()` method.
@@ -153,23 +109,6 @@ Handle auto-login by implementing a `GET /check_session` route. It should:
   - Return a JSON response with an error message, and a status of 401
     (Unauthorized).
 
-Make sure the signup and auto-login features work as intended before moving
-forward. You can test the `CheckSession` requests with pytest:
-
-```console
-$ pytest testing/app_testing/app_test.py::TestCheckSession
-```
-
-You should also be able to test this in the React application by signing up via
-the sign up form to check the `POST /signup` route; and refreshing the page
-after logging in, and seeing that you are still logged in to test the
-`GET /check_session` route.
-
-### Login Feature
-
-Now that users can create accounts via the API, let's give them a way to log
-back into an existing account.
-
 Handle login by implementing a `POST /login` route. It should:
 
 - Be handled in a `Login` resource with a `post()` method.
@@ -179,15 +118,6 @@ Handle login by implementing a `POST /login` route. It should:
 - If the user's username and password are not authenticated:
   - Return a JSON response with an error message, and a status of 401
     (Unauthorized).
-
-Make sure this route works as intended by running
-`pytest testing/app_testing/app_test.py::TestLogin` before moving forward. You
-should also be able to test this in the React application by logging in via the
-login form.
-
-### Logout Feature
-
-Users can log into our app! 🎉 Now, let's give them a way to log out.
 
 Handle logout by implementing a `DELETE /logout` route. It should:
 
@@ -200,21 +130,6 @@ Handle logout by implementing a `DELETE /logout` route. It should:
   - Return a JSON response with an error message, and a status of 401
     (Unauthorized).
 
-Make sure the login and logout features work as intended before moving forward.
-You can test the `Logout` requests with RSpec:
-
-```console
-$ pytest testing/app_testing/app_test.py::TestLogout
-```
-
-You should also be able to test this in the React application by logging in to
-check the `POST /login` route; and logging out with the logout button to test
-the `DELETE /logout` route.
-
-### Recipe List Feature
-
-Users should only be able to view recipes on our site after logging in.
-
 Handle recipe viewing by implementing a `GET /recipes` route. It should:
 
 - Be handled in a `RecipeIndex` resource with a `get()` method
@@ -226,10 +141,6 @@ Handle recipe viewing by implementing a `GET /recipes` route. It should:
 - If the user is **not** logged in when they make the request:
   - Return a JSON response with an error message, and a status of 401
     (Unauthorized).
-
-### Recipe Creation Feature
-
-Now that users can log in, let's allow them to create new recipes!
 
 Handle recipe creation by implementing a `POST /recipes` route. It should:
 
@@ -249,18 +160,130 @@ Handle recipe creation by implementing a `POST /recipes` route. It should:
   - Return a JSON response with the error messages, and an HTTP status code of
     422 (Unprocessable Entity).
 
+> **Note: Recall that we need to format our error messages in a way that makes
+> it easy to display the information in our frontend. For this lab, because we
+> are setting up multiple validations on our `User` and `Recipe` models, our
+> error responses need to be formatted in a way that accommodates multiple
+> errors.**
+
+### Task 3: Develop, Test, and Refine the Code
+
+#### Step 1: Build the Models
+
+Build the User and Recipe models with the required db columns.
+
+#### Step 2: Add Validations and Serialization to Models
+
+Add validations and constraints for both models.
+
+Implement serialization schemas for both models.
+
+#### Step 3: Migrate and Update the Database
+
+Run the migrations after creating your models. You'll need to run
+`flask db init` before running `flask db revision autogenerate` or
+`flask db upgrade`.
+
+#### Step 4: Verify your Code and Seed the Database
+
+Ensure that the tests for the models are passing before moving forward. To run
+the tests for _only_ the model files, run:
+
+```bash
+pytest testing/models_testing/
+```
+
+Once your tests are passing, you can seed your database from within the `server`
+directory by running:
+
+```bash
+python seed.py
+```
+
+#### Step 5: Sign Up Feature
+
+After creating the models, the next step is building out a sign up feature.
+
+#### Step 6: Auto-Login Feature
+
+Create the /check_session route.
+
+Make sure the signup and auto-login features work as intended before moving
+forward. You can test the `CheckSession` requests with pytest:
+
+```console
+$ pytest testing/app_testing/app_test.py::TestCheckSession
+```
+
+You should also be able to test this in the React application by signing up via
+the sign up form to check the `POST /signup` route; and refreshing the page
+after logging in, and seeing that you are still logged in to test the
+`GET /check_session` route.
+
+#### Step 7: Login Feature
+
+Build out the /login route.
+
+Make sure this route works as intended by running
+`pytest testing/app_testing/app_test.py::TestLogin` before moving forward. You
+should also be able to test this in the React application by logging in via the
+login form.
+
+#### Step 8: Logout Feature
+
+Build the /logout route.
+
+Make sure the login and logout features work as intended before moving forward.
+You can test the `Logout` requests with pytest:
+
+```console
+$ pytest testing/app_testing/app_test.py::TestLogout
+```
+
+You should also be able to test this in the React application by logging in to
+check the `POST /login` route; and logging out with the logout button to test
+the `DELETE /logout` route.
+
+#### Step 9: Recipe List Feature
+
+Build out the GET /recipes route.
+
+#### Step 10: Recipe Creation Feature
+
+Build out the POST /recipes route.
+
+#### Step 11: Verify and Refine your Code
+
 After finishing the `RecipeIndex` resource, you're done! Make sure to check your
 work. You should be able to run the full test suite now with `pytest`.
 
 You should also be able to test this in the React application by creating a new
 recipe with the recipe form, and viewing a list of recipes.
 
----
+#### Step 12: Commit and Push Git History
 
-## Resources
+* Commit and push your code:
 
-- [API - Flask: `class flask.session`](https://flask.palletsprojects.com/en/2.2.x/api/#flask.session)
-- [User's Guide - Flask RESTful](https://flask-restful.readthedocs.io/en/latest/)
-- [Flask-Bcrypt][bcrypt]
+```bash
+git add .
+git commit -m "final solution"
+git push
+```
 
-[bcrypt]: https://flask-bcrypt.readthedocs.io/en/1.0.1/
+* If you created a separate feature branch, remember to open a PR on main and merge.
+
+### Task 4: Document and Maintain
+
+Optional Best Practice documentation steps:
+* Add comments to the code to explain purpose and logic, clarifying intent and functionality of your code to other developers.
+* Update README text to reflect the functionality of the application following https://makeareadme.com. 
+  * Add screenshot of completed work included in Markdown in README.
+* Delete any stale branches on GitHub
+* Remove unnecessary/commented out code
+* If needed, update git ignore to remove sensitive data
+
+## Submit your solution
+
+CodeGrade will use the same test suite as the test suite included.
+
+Once all tests are passing, commit and push your work using `git` to submit to CodeGrade through Canvas.
