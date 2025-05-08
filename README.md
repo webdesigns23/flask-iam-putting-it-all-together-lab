@@ -48,6 +48,9 @@ npm start --prefix client
 
 ### Task 1: Define the Problem
 
+Our application is currently very bare. We'll need to build out models
+and endpoints to allow our frontend Recipe application to log in users,
+create recipes, and view recipes.
 
 ### Task 2: Determine the Design
 
