@@ -78,25 +78,29 @@ class RecipeIndex(Resource):
         return {'error': 'User is already logged out'}, 401  
 
     def post(self):
-        if session.get('user_id'):
-            request_json = request.get_json()
+        if not session.get('user_id'):
+                return {'error': 'User is already logged out'}, 401
+
+        data = request.get_json()
+
+        try:
             recipe = Recipe(
-                title = request_json.get('title'),
-                instructions = request_json.get('instructions'),
-                minutes_to_complete = request_json.get('minutes_to_complete'),
+                title = data.get('title'),
+                instructions = data.get('instructions'),
+                minutes_to_complete = data.get('minutes_to_complete'),
                 user_id=session['user_id']
             )
-        
-            try:
-                db.session.add(recipe)
-                db.session.commit()
-                return RecipeSchema().dump(recipe), 201
+            db.session.add(recipe)
+            db.session.commit()
+            return RecipeSchema().dump(recipe), 201
 
-            except IntegrityError:
-                return {'error': '422 Unprocessable Entity'}, 422
-                
-        return {'error': 'User is already logged out'}, 401  
-            
+        except ValueError:
+            db.session.rollback()  # use rollback to undo the add()
+            return {'error': str(ValueError)}, 422
+
+        except IntegrityError:
+            db.session.rollback()
+            return {'error': 'Unable to process, invalid data'}, 422     
 
 
 api.add_resource(Signup, '/signup', endpoint='signup')
