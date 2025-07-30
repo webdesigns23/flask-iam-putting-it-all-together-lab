@@ -31,11 +31,10 @@ class User(db.Model):
         
     def __repr__(self):
 	    return f'<User {self.username}, {self.image_url}, {self.bio}>'
-
+    
 
 class Recipe(db.Model):
     __tablename__ = 'recipes'
-    __talbe_args__ = (db.CheckConstraint('length(instructions) >= 50', name='instructions_length'),)
     
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String, nullable=False)
@@ -45,13 +44,19 @@ class Recipe(db.Model):
     user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
     user = db.relationship('User', back_populates='recipes')
 
+    @validates('instructions')
+    def validate_instructions(self, key, instructions):
+        if len(instructions) < 50:
+            raise ValueError("Instructions must be at least 50 characters long.")
+        return instructions
+
 class UserSchema(Schema):
     id = fields.Integer()
     username = fields.String()
     image_url = fields.String()
     bio = fields.String()
 
-    recipes = fields.List(fields.Nested(lambda: RecipeSchema(exclude=('user,'))))
+    recipes = fields.List(fields.Nested(lambda: RecipeSchema(exclude=('user',))))
 
 class RecipeSchema(Schema):
     id = fields.Integer()
@@ -59,4 +64,4 @@ class RecipeSchema(Schema):
     instructions = fields.String()
     minutes_to_complete = fields.Integer()
 
-    user = fields.Nested(UserSchema(exclude=('posts',)))
+    user = fields.Nested(UserSchema(exclude=('recipes',)))
